@@ -1,59 +1,104 @@
 import java.util.Scanner;
 
-public class Calculator{
-    public static void main(String[] args) {
-        Converter converter = new Converter();
-        String[] actions = {"+", "-", "/", "*"};
-        String[] regexActions = {"\\+", "-", "/", "\\*"};
+class Calc {
+
+    public static void main(String[] args) throws Exception {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Введите выражение ");
-        String exp = scanner.nextLine();
-        int actionIndex=-1;
-        for (int i = 0; i < actions.length; i++){
-            if (exp.contains(actions[i])) {
-                actionIndex = i;
-                break;
-            }
-            }
-        if (actionIndex==-1) {
-            System.out.println("Некорректное выражение");
-            return;
-        }
-        String[] data = exp.split(regexActions[actionIndex]);
-        if(converter.isRoman(data[0]) == converter.isRoman(data[1])){
-            int a, b;
-            boolean isRoman = converter.isRoman(data[0]);
-            if (isRoman) {
-                a = converter.romanToInt(data[0]);
-                b = converter.romanToInt(data[1]);
-            }else{
-                a = Integer.parseInt(data[0]);
-                b = Integer.parseInt(data[1]);
-            }
-            int result;
-            switch (actions[actionIndex]) {
-                case "+":
-                    result = a + b;
-                    break;
-                case "-":
-                    result = a - b;
-                    break;
-                case "*":
-                    result = a * b;
-                    break;
-                default:
-                    result = a / b;
-                    break;
-            }
-            if (isRoman) {
-                System.out.println(converter.intToRoman(result));
-            } else {
-                System.out.println(result);
-            }
-        } else {
-    System.out.println("Числа должны быть в одном формате");
-        }
-
-
+        System.out.println("Введите выражение");
+        String expression = scanner.nextLine();
+        System.out.println(calc(expression));
     }
+
+    public static String calc (String expression) throws Exception {
+        int a;
+        int b;
+        String oper;
+        String result;
+        boolean isRoman;
+        String[] operands = expression.split("[+\\-*/]");
+        oper = detectOperation(expression);
+        if (oper == null) {
+            throw new Exception("Неподдерживаемая математическая операция");
+        }
+        if (operands.length != 2) throw new Exception("Должно быть два операнда");
+        if (Roman.isRoman(operands[0]) && Roman.isRoman(operands[1])) {
+            a = Roman.convertToArabian(operands[0]);
+            b = Roman.convertToArabian(operands[1]);
+            isRoman = true;
+        }
+        else if (!Roman.isRoman(operands[0]) && !Roman.isRoman(operands[1])) {
+            a = Integer.parseInt(operands[0]);
+            b = Integer.parseInt(operands[1]);
+            isRoman = false;
+        }
+        else {
+            throw new Exception("Числа должны быть в одном формате");
+        }
+        if (a > 10 || b > 10) {
+            throw new Exception("Числа должны быть от 1 до 10");
+        }
+        int arabian = calc(a, b, oper);
+        if (isRoman) {
+            if (arabian <= 0) {
+                throw new Exception("Римское число должно быть больше нуля");
+            }
+            result = Roman.convertToRoman(arabian);
+        } else {
+            result = String.valueOf(arabian);
+        }
+        return result;
+    }
+
+    static String detectOperation(String expression) {
+        if (expression.contains("+")) return "+";
+        else if (expression.contains("-")) return "-";
+        else if (expression.contains("*")) return "*";
+        else if (expression.contains("/")) return "/";
+        else return null;
+    }
+
+    static int calc(int a, int b, String oper) {
+
+        if (oper.equals("+")) return a + b;
+        else if (oper.equals("-")) return a - b;
+        else if (oper.equals("*")) return a * b;
+        else return a / b;
+    }
+
+}
+
+class Roman {
+    static String[] romanArray = new String[]{"0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI",
+            "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXIII", "XXIV",
+            "XXV", "XXVI", "XXVII", "XXVIII", "XXIX", "XXX", "XXXI", "XXXII", "XXXIII", "XXXIV", "XXXV", "XXXVI",
+            "XXXVII", "XXXVIII", "XXXIX", "XL", "XLI", "XLII", "XLIII", "XLIV", "XLV", "XLVI", "XLVII", "XLVIII",
+            "XLIX", "L", "LI", "LII", "LIII", "LIV", "LV", "LVI", "LVII", "LVIII", "LIX", "LX", "LXI", "LXII",
+            "LXIII", "LXIV", "LXV", "LXVI", "LXVII", "LXVIII", "LXIX", "LXX", "LXXI", "LXXII", "LXXIII", "LXXIV",
+            "LXXV", "LXXVI", "LXXVII", "LXXVIII", "LXXIX", "LXXX", "LXXXI", "LXXXII", "LXXXIII", "LXXXIV", "LXXXV",
+            "LXXXVI", "LXXXVII", "LXXXVIII", "LXXXIX", "XC", "XCI", "XCII", "XCIII", "XCIV", "XCV", "XCVI", "XCVII",
+            "XCVIII", "XCIX", "C" };
+
+
+    public static boolean isRoman(String val) {
+        for (int i = 0; i < romanArray.length; i++) {
+            if (val.equals(romanArray[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static int convertToArabian(String roman) {
+        for (int i = 0; i < romanArray.length; i++) {
+            if (roman.equals(romanArray[i])) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static String convertToRoman(int arabian) {
+        return romanArray[arabian];
+    }
+
 }
